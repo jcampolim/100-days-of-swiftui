@@ -1,16 +1,28 @@
 import SwiftUI
 
 struct ContentView: View {
-    let units: [String] = ["Temperature", "Length"]
+    let units: [String] = ["Temperature", "Length", "Time", "Volume"]
     
-    let unitsTemperature: [UnitTemperature] = [.celsius, .fahrenheit, .kelvin]
-    let unitsLength: [UnitLength] = [.meters, .kilometers, .feet, .yards, .miles]
+    let unitsTemperature: [Dimension] = [UnitTemperature.celsius, UnitTemperature.fahrenheit, UnitTemperature.kelvin]
+    let unitsLength: [Dimension] = [UnitLength.meters, UnitLength.kilometers, UnitLength.feet, UnitLength.yards, UnitLength.miles]
+    let unitsTime: [Dimension] = [UnitDuration.milliseconds, UnitDuration.seconds, UnitDuration.minutes, UnitDuration.hours]
+    let unitsVolume: [Dimension] = [UnitVolume.milliliters, UnitVolume.liters, UnitVolume.cups, UnitVolume.pints, UnitVolume.gallons]
 
     @State private var selectedUnit: String = "Temperature"
 
     @State private var inputValue: Double = 0
-    @State private var unitFrom: UnitTemperature = .celsius
-    @State private var unitTo: UnitTemperature = .fahrenheit
+    @State private var unitFrom: Dimension = UnitTemperature.celsius
+    @State private var unitTo: Dimension = UnitTemperature.celsius
+    
+    var currentUnitList: [Dimension] {
+        switch selectedUnit {
+        case "Temperature": return unitsTemperature
+        case "Length": return unitsLength
+        case "Time": return unitsTime
+        case "Volume": return unitsVolume
+        default: return unitsTemperature
+        }
+    }
 
     var convertedValue: Double {
         let input = Measurement(value: inputValue, unit: unitFrom)
@@ -43,15 +55,15 @@ struct ContentView: View {
 
                 VStack(spacing: 16) {
                     Picker("From", selection: $unitFrom) {
-                        ForEach(unitsTemperature, id: \.self) {
-                            Text($0.displayName)
+                        ForEach(currentUnitList, id: \.self) { unit in
+                            Text(unit.symbol).tag(unit)
                         }
                     }
                     .pickerStyle(.segmented)
 
                     Picker("To", selection: $unitTo) {
-                        ForEach(unitsTemperature, id: \.self) {
-                            Text($0.displayName)
+                        ForEach(currentUnitList, id: \.self) { unit in
+                            Text(unit.symbol).tag(unit)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -84,28 +96,4 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
-}
-
-extension UnitTemperature {
-    var displayName: String {
-        switch self {
-        case .celsius: return "Celsius"
-        case .fahrenheit: return "Fahrenheit"
-        case .kelvin: return "Kelvin"
-        default: return symbol
-        }
-    }
-}
-
-extension UnitLength {
-    var displayName: String {
-        switch self {
-        case .meters: return "Meter"
-        case .kilometers: return "Kilometers"
-        case .feet: return "Feet"
-        case .yards: return "Yards"
-        case .miles: return "Miles"
-        default: return symbol
-        }
-    }
-}
+}   
